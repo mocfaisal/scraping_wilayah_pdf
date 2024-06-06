@@ -1,31 +1,23 @@
 {
-  "name": "scraping_pdf",
+  "name": "scraping_wilayah_pdf",
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
     "test": "node app.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "PDF",
+    "Node",
+    "CSV",
+    "mysql"
+  ],
+  "author": "mocfaisal",
   "license": "ISC",
-  "description": "",
+  "description": "Scraping Region from PDF files",
   "dependencies": {
-    "@pomgui/pdf-tables-parser": "^0.1.0",
-    "csv-parse": "^5.5.6",
-    "csv-stringify": "^6.5.0",
-    "csv-write-stream": "^2.0.0",
-    "csv-writer": "^1.6.0",
     "dotenv": "^16.4.5",
-    "fs": "^0.0.1-security",
     "mysql": "^2.18.1",
     "papaparse": "^5.4.1",
-    "pdf-lib": "^1.17.1",
-    "pdf-parse": "^1.1.1",
-    "pdf-table-extractor": "^1.0.3",
-    "pdf.js": "^0.1.0",
-    "pdfjs": "^2.5.3",
-    "pdfjs-dist": "^2.7.570",
-    "regex": "^0.1.1",
-    "tabula-js": "^1.0.1"
+    "pdf-table-extractor": "^1.0.3"
   }
 }
