@@ -10,7 +10,7 @@ const outputCsvFile = 'output.csv';
 
 // Fungsi untuk mengecek apakah string adalah kode wilayah yang valid
 function isValidCode(txt) {
-    return /^[0-9]{2}(\.[0-9]{2}(\.[0-9]{2}(\.[1-2][0-9]{3})?)?)?$/.test(txt);
+    return /^[0-9]{2}(\.[0-9]{2}(\.[0-9]{2}(\.[0-9]{4})?)?)?$/.test(txt);
 }
 
 // Fungsi untuk mengekstrak data dari PDF
@@ -29,10 +29,22 @@ function handleExtractionSuccess(result) {
 
     data.forEach(value => {
         let tableData = value.tables;
+
+        // console.log(tableData);
+        // return false;
+
         tableData.forEach(row => {
             let code = row[0];
-            if (row.length === 9 && isValidCode(code)) {
-                let rawName = [row[1], row[4], row[5], row[6]];
+            let rawName = [];
+            if (isValidCode(code)) {
+                // Column length
+                if (row.length == 9){
+                    rawName = [row[1], row[4], row[5], row[6]];
+                }
+                else if (row.length == 11) {
+                    rawName = [row[1], row[5], row[7], row[8]];
+                }
+
                 let sanitizedName = sanitizeName(code, rawName);
                 let codeDetails = identifyCodeType(code);
                 extractedData.push([code, sanitizedName, codeDetails.level, codeDetails.type]);
@@ -40,6 +52,9 @@ function handleExtractionSuccess(result) {
         });
     });
 
+    // console.log(extractedData)
+
+    // return false;
     // Hapus duplikat berdasarkan kode wilayah
     let uniqueData = removeDuplicates(extractedData);
 
@@ -68,21 +83,41 @@ function removeDuplicates(data) {
 function sanitizeName(code, rawName) {
     let name = rawName;
 
-    if (code.length === 2) {
-        name = rawName[0].replace(/\r/g, '');
-    } else if (code.length === 5) {
-        name = rawName[0].replace(/\r/g, '').replace(/[0-9]+/g, '').trim();
-    } else if (code.length === 8) {
-        name = rawName[1].replace(/^[-\d\s]*/, "");
-    } else if (code.length === 13) {
-        name = [rawName[2], rawName[3]].join(' ').replace(/^[-\d\s]*/, "");
+    if (code.length == 2) {
+        // Provinsi
+        name = rawName[0];
+    } else if (code.length == 5) {
+        // Kabupaten
+        name = rawName[0]
+    } else if (code.length == 8) {
+        // Kecamatan
+        name = rawName[1]
+    } else if (code.length == 13) {
+        // Kelurahan / Desa
+        name = [rawName[2], rawName[3]].join(' ');
     } else if (/^[-\d\s]*/.test(rawName)) {
-        name = [rawName[2], rawName[3]].join(' ').replace(/^[-\d\s]*/, "");
+        name = [rawName[2], rawName[3]].join(' ');
+    }
+
+    name = name.replace(/\r?\n|\r/g, ' ').replace(/\s+/g, ' ').trim();
+
+    if (code.length == 2) {
+        // Provinsi
+        name = name;
+    } else if (code.length == 5) {
+        // Kabupaten
+        name = name.replace(/[0-9]+/g, '');
+    } else if (code.length == 8) {
+        // Kecamatan
+        name = name.replace(/^[-\d\s]*/, "");
+    } else if (code.length == 13) {
+        // Kelurahan / Desa
+        name = name.replace(/^[-\d\s]*/, "");
+    } else if (/^[-\d\s]*/.test(rawName)) {
+        name = name.replace(/^[-\d\s]*/, "");
     } else {
         return null;
     }
-
-    name = name.replace(/\s+/g, ' ').trim();
 
     // Sanitasi kasus seperti `P A P U A`
     if (/^([A-Za-z] )+[A-Za-z]$/.test(name)) {
@@ -99,16 +134,16 @@ function identifyCodeType(code) {
     let type = null;
     let level = 1;
 
-    if (code.length === 2) {
+    if (code.length == 2) {
         level = 1;
-    } else if (code.length === 5) {
+    } else if (code.length == 5) {
         level = 2;
-        type = (code[3] >= '0' && code[3] <= '6') ? 1 : (code[3] >= '7' && code[3] <= '9') ? 2 : null;
-    } else if (code.length === 8) {
+        type = (code[3] >= 0 && code[3] <= 6) ? 1 : (code[3] >= 7 && code[3] <= 9) ? 2 : null;
+    } else if (code.length == 8) {
         level = 3;
-    } else if (code.length === 13) {
+    } else if (code.length == 13) {
         level = 4;
-        type = (code[9] == '1') ? 1 : (code[9] == '2') ? 2 : null;
+        type = (code[9] == 1) ? 1 : (code[9] == 2 || code[9] == 3) ? 2 : null;
     }
 
     return { level: level, type: type };
@@ -124,7 +159,7 @@ function saveToCsv(data, csvPath) {
         columns: ['Code', 'Name', 'Level', 'Type']
     });
 
-    if (!fs.existsSync(distDir)){
+    if (!fs.existsSync(distDir)) {
         fs.mkdirSync(distDir, { recursive: true });
     }
 
