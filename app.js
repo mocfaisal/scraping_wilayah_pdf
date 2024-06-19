@@ -29,10 +29,22 @@ function handleExtractionSuccess(result) {
 
     data.forEach(value => {
         let tableData = value.tables;
+
+        // console.log(tableData);
+        // return false;
+
         tableData.forEach(row => {
             let code = row[0];
-            if (row.length === 9 && isValidCode(code)) {
-                let rawName = [row[1], row[4], row[5], row[6]];
+            let rawName = [];
+            if (isValidCode(code)) {
+                // Column length
+                if (row.length == 9){
+                    rawName = [row[1], row[4], row[5], row[6]];
+                }
+                else if (row.length == 11) {
+                    rawName = [row[1], row[5], row[7], row[8]];
+                }
+
                 let sanitizedName = sanitizeName(code, rawName);
                 let codeDetails = identifyCodeType(code);
                 extractedData.push([code, sanitizedName, codeDetails.level, codeDetails.type]);
@@ -40,6 +52,7 @@ function handleExtractionSuccess(result) {
         });
     });
 
+    // return false;
     // Hapus duplikat berdasarkan kode wilayah
     let uniqueData = removeDuplicates(extractedData);
 
@@ -99,16 +112,16 @@ function identifyCodeType(code) {
     let type = null;
     let level = 1;
 
-    if (code.length === 2) {
+    if (code.length == 2) {
         level = 1;
-    } else if (code.length === 5) {
+    } else if (code.length == 5) {
         level = 2;
-        type = (code[3] >= '0' && code[3] <= '6') ? 1 : (code[3] >= '7' && code[3] <= '9') ? 2 : null;
-    } else if (code.length === 8) {
+        type = (code[3] >= 0 && code[3] <= 6) ? 1 : (code[3] >= 7 && code[3] <= 9) ? 2 : null;
+    } else if (code.length == 8) {
         level = 3;
-    } else if (code.length === 13) {
+    } else if (code.length == 13) {
         level = 4;
-        type = (code[9] == '1') ? 1 : (code[9] == '2') ? 2 : null;
+        type = (code[9] == 1) ? 1 : (code[9] == 2) ? 2 : null;
     }
 
     return { level: level, type: type };
@@ -124,7 +137,7 @@ function saveToCsv(data, csvPath) {
         columns: ['Code', 'Name', 'Level', 'Type']
     });
 
-    if (!fs.existsSync(distDir)){
+    if (!fs.existsSync(distDir)) {
         fs.mkdirSync(distDir, { recursive: true });
     }
 

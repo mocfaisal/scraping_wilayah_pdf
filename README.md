@@ -64,6 +64,10 @@ Here are some related projects
 
 [Scraping Permendagri 72/2019 - Python](https://github.com/kodewilayah/permendagri-72-2019)
 
+# Known Bugs
+- [x] Kurang 1 Kabupaten/Kota - Fixed
+- [ ] Jumlah Kelurahan/Desa tidak sama (83.749) seharusnya (83.763), kurang 14 data desa provinsi Papua
+
 ## Changelog
 
 - [x] 2024-06-06 | v1.0 | Scrapping Data | Data Wilayah Kemendagri - Kepmen 100.1.1-6117 Tahun 2022
