@@ -66,7 +66,7 @@ Here are some related projects
 
 # Known Bugs
 - [x] Kurang 1 Kabupaten/Kota - Fixed
-- [ ] Jumlah Kelurahan/Desa tidak sama (83.749) seharusnya (83.763), kurang 14 data desa provinsi Papua
+- [x] Jumlah Kelurahan/Desa tidak sama (83.749) seharusnya (83.763), kurang 14 data desa provinsi Papua
 
 ## Changelog
 

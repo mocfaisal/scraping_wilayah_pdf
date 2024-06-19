@@ -10,7 +10,7 @@ const outputCsvFile = 'output.csv';
 
 // Fungsi untuk mengecek apakah string adalah kode wilayah yang valid
 function isValidCode(txt) {
-    return /^[0-9]{2}(\.[0-9]{2}(\.[0-9]{2}(\.[1-2][0-9]{3})?)?)?$/.test(txt);
+    return /^[0-9]{2}(\.[0-9]{2}(\.[0-9]{2}(\.[0-9]{4})?)?)?$/.test(txt);
 }
 
 // Fungsi untuk mengekstrak data dari PDF
@@ -52,6 +52,8 @@ function handleExtractionSuccess(result) {
         });
     });
 
+    // console.log(extractedData)
+
     // return false;
     // Hapus duplikat berdasarkan kode wilayah
     let uniqueData = removeDuplicates(extractedData);
@@ -81,21 +83,41 @@ function removeDuplicates(data) {
 function sanitizeName(code, rawName) {
     let name = rawName;
 
-    if (code.length === 2) {
-        name = rawName[0].replace(/\r/g, '');
-    } else if (code.length === 5) {
-        name = rawName[0].replace(/\r/g, '').replace(/[0-9]+/g, '').trim();
-    } else if (code.length === 8) {
-        name = rawName[1].replace(/^[-\d\s]*/, "");
-    } else if (code.length === 13) {
-        name = [rawName[2], rawName[3]].join(' ').replace(/^[-\d\s]*/, "");
+    if (code.length == 2) {
+        // Provinsi
+        name = rawName[0];
+    } else if (code.length == 5) {
+        // Kabupaten
+        name = rawName[0]
+    } else if (code.length == 8) {
+        // Kecamatan
+        name = rawName[1]
+    } else if (code.length == 13) {
+        // Kelurahan / Desa
+        name = [rawName[2], rawName[3]].join(' ');
     } else if (/^[-\d\s]*/.test(rawName)) {
-        name = [rawName[2], rawName[3]].join(' ').replace(/^[-\d\s]*/, "");
+        name = [rawName[2], rawName[3]].join(' ');
+    }
+
+    name = name.replace(/\r?\n|\r/g, ' ').replace(/\s+/g, ' ').trim();
+
+    if (code.length == 2) {
+        // Provinsi
+        name = name;
+    } else if (code.length == 5) {
+        // Kabupaten
+        name = name.replace(/[0-9]+/g, '');
+    } else if (code.length == 8) {
+        // Kecamatan
+        name = name.replace(/^[-\d\s]*/, "");
+    } else if (code.length == 13) {
+        // Kelurahan / Desa
+        name = name.replace(/^[-\d\s]*/, "");
+    } else if (/^[-\d\s]*/.test(rawName)) {
+        name = name.replace(/^[-\d\s]*/, "");
     } else {
         return null;
     }
-
-    name = name.replace(/\s+/g, ' ').trim();
 
     // Sanitasi kasus seperti `P A P U A`
     if (/^([A-Za-z] )+[A-Za-z]$/.test(name)) {
@@ -121,7 +143,7 @@ function identifyCodeType(code) {
         level = 3;
     } else if (code.length == 13) {
         level = 4;
-        type = (code[9] == 1) ? 1 : (code[9] == 2) ? 2 : null;
+        type = (code[9] == 1) ? 1 : (code[9] == 2 || code[9] == 3) ? 2 : null;
     }
 
     return { level: level, type: type };
